@@ -155,8 +155,16 @@ add_definitions(-DPATH_RRDTOOL=\"/usr/bin/rrdtool\")
 add_definitions(-DHONEYD_PLUGINS_DECLARE=)
 add_definitions(-DHONEYD_PLUGINS=)
 
+include_directories (${honeyd_SOURCE_DIR})
 include_directories (${honeyd_SOURCE_DIR}/compat)
 include_directories (${honeyd_SOURCE_DIR}/compat/libdnet)
+
+find_package(BISON)
+find_package(FLEX)
+
+BISON_TARGET(LeafParser ${CMAKE_CURRENT_SOURCE_DIR}/parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c)
+FLEX_TARGET(LeafScanner ${CMAKE_CURRENT_SOURCE_DIR}/lex.l  ${CMAKE_CURRENT_BINARY_DIR}/lex.c COMPILE_FLAGS "-Phyd")
+ADD_FLEX_BISON_DEPENDENCY(LeafScanner LeafParser)
 
 add_executable(hsniff
     hsniff.c
@@ -210,8 +218,8 @@ target_link_libraries (honeydstats  dumbnet event z dl)
 add_executable(honeyd
     honeyd.c
     command.c
-    parse.c
-    lex.c
+    ${BISON_LeafParser_OUTPUTS}
+    ${FLEX_LeafScanner_OUTPUTS}
     config.c
     personality.c
     util.c
