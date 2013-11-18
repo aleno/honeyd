@@ -131,6 +131,20 @@ set(VERSION "1.6e")
 # const
 # ...
 
+set(CPACK_PACKAGE_VERSION ${VERSION})
+#set(CPACK_GENERATOR "DEB")
+#set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_SOURCE_IGNORE_FILES "${CMAKE_CURRENT_BINARY_DIR}/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+set(CPACK_PACKAGE_NAME "my_project")
+set(CPACK_PACKAGE_RELEASE 1)
+set(CPACK_PACKAGE_CONTACT "John Explainer")
+set(CPACK_PACKAGE_VENDOR "My Company")
+#set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+#set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
+include(CPack)
+
+
 # Include directories
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -259,3 +273,14 @@ add_executable(honeyd
 
 # link the libraries to the executable
 target_link_libraries (honeyd pcap dumbnet event m z dl)
+
+install(TARGETS honeyd DESTINATION bin)
+install(TARGETS honeydctl DESTINATION bin)
+install(TARGETS honeydstats DESTINATION bin)
+install(TARGETS hsniff DESTINATION bin)
+install(TARGETS libhoneyd ARCHIVE DESTINATION lib)
+install(FILES honeydctl.1 DESTINATION share/man/man1)
+install(FILES honeyd.8 DESTINATION share/man/man8)
+install(FILES hooks.h plugins.h plugins_config.h debug.h DESTINATION include)
+install(DIRECTORY scripts DESTINATION share/honeyd)
+
