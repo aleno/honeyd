@@ -153,6 +153,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Find DNET
 include(FindDNET)
+if(HAVE_LIBDNET)
+    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${DNET_CFLAGS})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${DNET_CFLAGS})
+endif(HAVE_LIBDNET)
 if (HAVE_DUMBNET_H)
   message("fix dnet")
   include_directories (${honeyd_SOURCE_DIR}/compat/libdnet)
@@ -202,7 +206,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap dumbnet event z dl)
+target_link_libraries (hsniff pcap event z dl ${DNET_LIBRARIES})
 
 add_executable(honeydctl
     honeydctl.c
@@ -234,7 +238,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats  dumbnet event z dl)
+target_link_libraries (honeydstats event z dl ${DNET_LIBRARIES})
 
 add_executable(honeyd
     honeyd.c
@@ -279,7 +283,7 @@ add_executable(honeyd
 )
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap dumbnet event m z dl)
+target_link_libraries (honeyd pcap event m z dl ${DNET_LIBRARIES})
 
 install(TARGETS honeyd DESTINATION bin)
 install(TARGETS honeydctl DESTINATION bin)

@@ -1,90 +1,127 @@
 ###################################################################
-#  $Id$
+# - Find the Dumb (not so!) Library: dnet
+# Find the DNET includes and library
+# http://code.google.com/p/libdnet/
 #
-#  Copyright (c) 2009 Aaron Turner, <aturner at synfin dot net>
-#  All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# * Redistributions of source code must retain the above copyright
-#   notice, this list of conditions and the following disclaimer.
-#
-# * Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in
-#   the documentation and/or other materials provided with the
-#   distribution.
-#
-# * Neither the name of the Aaron Turner nor the names of its
-#   contributors may be used to endorse or promote products derived
-#   from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
-###################################################################
-# - Find libdnet
-# Find the libdnet includes and library
-# http://libdnet.sourceforge.net/
-#
-# The environment variable LIBDNET_DIR allows to specify where to find 
+# The environment variable DNETDIR allows to specficy where to find 
 # libdnet in non standard location.
-#
-#  DNET_CFLAGS - where to find dnet.h, etc.
-#  DNET_LIBS   - List of libraries when using libdnet.
-#  HAVE_LIBDNET       - True if libdnet found.
-#  LIBDNET_VERSION   - version of libdnet
+#  
+#  DNET_INCLUDE_DIRS - where to find dnet.h, etc.
+#  DNET_LIBRARIES   - List of libraries when using dnet.
+#  DNET_FOUND       - True if dnet found.
 
-SET(founddnet false)
-FOREACH(testdir ${LIBDNET_DIR} /usr/local /opt/local /usr) 
-    EXECUTE_PROCESS(COMMAND ${testdir}/bin/dnet-config --cflags
-        RESULT_VARIABLE exit_code
-        OUTPUT_VARIABLE DNET_CFLAGS
-    )
-    IF(exit_code EQUAL 0)
-        SET(founddnet ${testdir})
-    ENDIF(exit_code EQUAL 0)
-ENDFOREACH(testdir)
 
-IF(founddnet)
-    EXECUTE_PROCESS(COMMAND ${founddnet}/bin/dnet-config --cflags
-        OUTPUT_VARIABLE cflags
-    )
-    EXECUTE_PROCESS(COMMAND ${founddnet}/bin/dnet-config --libs
-        OUTPUT_VARIABLE libs
-    )
-    EXECUTE_PROCESS(COMMAND ${founddnet}/bin/dnet-config --version
-        OUTPUT_VARIABLE version
-    )
+IF(EXISTS $ENV{DNETDIR})
+  FIND_PATH(DNET_INCLUDE_DIR 
+    NAMES
+    dnet.h
+    dnet/ip.h
+    dnet/tcp.h
+    dnet/udp.h
+    PATHS
+      $ENV{DNETDIR}
+    NO_DEFAULT_PATH
+  )
+  
+  FIND_LIBRARY(DNET_LIBRARY
+    NAMES 
+      dnet
+    PATHS
+      $ENV{DNETDIR}
+    NO_DEFAULT_PATH
+  )
 
-    # remove new line from --version
-    STRING(REGEX REPLACE "\n" "" newversion ${version})
-    SET(LIBDNET_VERSION ${newversion})
+# Because DEBIAN _is_ specific :(  
+  FIND_PATH(DNET_INCLUDE_DIR 
+    NAMES
+    dumbnet.h
+    dumbnet/ip.h
+    dumbnet/tcp.h
+    dumbnet/udp.h
+    PATHS
+      $ENV{DNETDIR}
+    NO_DEFAULT_PATH
+  )
+  IF(EXISTS $ENV{DNET_INCLUDE_DIR}/dumbnet.h)
+    SET(OS_DEBIAN "YES")
+  ENDIF(EXISTS $ENV{DNET_INCLUDE_DIR}/dumbnet.h)
+  
+  FIND_LIBRARY(DNET_LIBRARY
+    NAMES 
+      dumbnet
+    PATHS
+      $ENV{DNETDIR}
+    NO_DEFAULT_PATH
+  )
 
-    STRING(REGEX REPLACE "\n" "" newlibs ${libs})
-    SET(DNET_LIBS ${newlibs})
+ELSE(EXISTS $ENV{DNETDIR})
+  FIND_PATH(DNET_INCLUDE_DIR 
+    NAMES
+    dnet.h
+    dnet/ip.h
+    dnet/tcp.h
+    dnet/udp.h
+  )
+  
+  FIND_LIBRARY(DNET_LIBRARY
+    NAMES 
+      dnet
+  )
 
-    STRING(REGEX REPLACE "\n" "" newcflags ${cflags})
-    SET(DNET_CFLAGS ${newcflags})
+# Because DEBIAN _is_ specific :(  
+  FIND_PATH(DNET_INCLUDE_DIR 
+    NAMES
+    dumbnet.h
+    dumbnet/ip.h
+    dumbnet/tcp.h
+    dumbnet/udp.h
+  )
+  IF(EXISTS $ENV{DNET_INCLUDE_DIR}/dumbnet.h)
+    SET(OS_DEBIAN "YES")
+  ENDIF(EXISTS $ENV{DNET_INCLUDE_DIR}/dumbnet.h)
+  
+  FIND_LIBRARY(DNET_LIBRARY
+    NAMES 
+      dumbnet
+  )
+  
+ENDIF(EXISTS $ENV{DNETDIR})
 
-    # Normally is dnet.h, but Debian renamed it due to a naming conflict
-    check_include_files("dnet.h"              HAVE_DNET_H)
-    check_include_files("dumbnet.h"           HAVE_DUMBNET_H)
+SET(DNET_INCLUDE_DIRS ${DNET_INCLUDE_DIR})
+SET(DNET_LIBRARIES ${DNET_LIBRARY})
 
-    SET(HAVE_LIBDNET YES)
-    MESSAGE(STATUS "Using libdnet from ${founddnet}")
-ELSE(founddnet)
-    MESSAGE(STATUS "Unable to locate libdnet (missing dnet-config)")
-    SET(HAVE_LIBDNET NO)
-ENDIF(founddnet)
+IF(DNET_INCLUDE_DIRS)
+  MESSAGE(STATUS "dnet include dirs set to ${DNET_INCLUDE_DIRS}")
+ELSE(DNET_INCLUDE_DIRS)
+  MESSAGE(FATAL " dnet include dirs cannot be found")
+ENDIF(DNET_INCLUDE_DIRS)
+
+IF(DNET_LIBRARIES)
+  MESSAGE(STATUS "dnet library set to  ${DNET_LIBRARIES}")
+ELSE(DNET_LIBRARIES)
+  MESSAGE(FATAL "dnet library cannot be found")
+ENDIF(DNET_LIBRARIES)
+
+IF(OS_DEBIAN)
+  MESSAGE(STATUS "dnet is dumbnet")
+  SET(HAVE_DUMBNET 1)
+ENDIF(OS_DEBIAN)
+
+#Functions
+INCLUDE(CheckFunctionExists)
+SET(CMAKE_REQUIRED_INCLUDES ${DNET_INCLUDE_DIRS})
+SET(CMAKE_REQUIRED_LIBRARIES ${DNET_LIBRARIES})
+CHECK_FUNCTION_EXISTS("ip_checksum" HAVE_DNET_IPCHECKSUM)
+CHECK_FUNCTION_EXISTS("ip_ntoa" HAVE_DNET_IP_NTOA)
+
+CHECK_INCLUDE_FILES("dnet.h" HAVE_DNET_H)
+CHECK_INCLUDE_FILES("dumbnet.h" HAVE_DUMBNET_H)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(DNET DEFAULT_MSG DNET_INCLUDE_DIRS DNET_LIBRARIES)
+
+MARK_AS_ADVANCED(
+  DNET_LIBRARIES
+  DNET_INCLUDE_DIRS
+  HAVE_DUMBNET
+)
