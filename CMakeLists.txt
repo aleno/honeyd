@@ -35,12 +35,13 @@ set(DLOPENLIBC "libc.so.6")
 check_struct_has_member("struct msghdr" msg_accrights sys/socket.h HAVE_ACCRIGHTS_IN_MSGHDR)
 check_function_exists(asprintf HAVE_ASPRINTF)
 check_include_files(assert.h HAVE_ASSERT_H)
+
+
 # HAVE_BROKEN_DNET
 check_struct_has_member("struct msghdr" msg_control sys/socket.h HAVE_CONTROL_IN_MSGHDR)
 check_function_exists(daemon HAVE_DAEMON)
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 # HAVE_DOPRNT
-set(HAVE_DUMBNET 1)
 # HAVE_DUMBNET
 check_function_exists(dup2 HAVE_DUP2)
 check_function_exists(err HAVE_ERR)
@@ -150,6 +151,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Find DNET
+include(FindDNET)
+if (HAVE_DUMBNET_H)
+  message("fix dnet")
+  include_directories (${honeyd_SOURCE_DIR}/compat/libdnet)
+endif (HAVE_DUMBNET_H)
+
 # Configure files
 add_definitions("-DHAVE_CONFIG_H")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
@@ -171,7 +179,6 @@ add_definitions(-DHONEYD_PLUGINS=)
 
 include_directories (${honeyd_SOURCE_DIR})
 include_directories (${honeyd_SOURCE_DIR}/compat)
-include_directories (${honeyd_SOURCE_DIR}/compat/libdnet)
 
 find_package(BISON)
 find_package(FLEX)

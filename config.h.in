@@ -37,7 +37,7 @@
 #cmakedefine HAVE_DOPRNT
 
 /* Define if our libdnet is a libdumbnet */
-#cmakedefine HAVE_DUMBNET
+#cmakedefine HAVE_DUMBNET_H
 
 /* Define to 1 if you have the `dup2' function. */
 #cmakedefine HAVE_DUP2

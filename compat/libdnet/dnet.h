@@ -6,7 +6,7 @@
  * libdnet names -- in particular, libdnet is libdumbnet
  * on Debian, and dnet-config doesn't hide this :( --CPK.
  */
-#ifdef HAVE_DUMBNET
+#ifdef HAVE_DUMBNET_H
 #include <dumbnet.h>
 #endif
 
