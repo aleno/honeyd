@@ -1,5 +1,10 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Honeyd Paths */
+#define PATH_HONEYDINCLUDE "${PATH_HONEYDINCLUDE}"
+#define PATH_HONEYDLIB "${PATH_HONEYDLIB}"
+#define PATH_HONEYDDATA "${PATH_HONEYDDATA}"
+
 /* Define kqueue should be disabled for libevent */
 #cmakedefine DISABLE_KQUEUE
 
